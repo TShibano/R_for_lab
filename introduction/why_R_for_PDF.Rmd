@@ -1,16 +1,20 @@
 ---
 title: "なぜR?"
 author: "Toshiki SHIBANO"
-date: "`r Sys.Date()`"
-output:
+date: '`r Sys.Date()`'
+output: 
   pdf_document:
-    toc: yes
-  html_document:
-    toc: yes
+    latex_engin: xelatex
+documentclass: bxjsarticle
+classoption: 
+  xelatex,ja=standard
+  
 ---
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
+knitr::opts_chunk$set(echo = TRUE,
+                      dev = "cairo_pdf",
+                      dev.args = list(family = "ipaexg"))
 ```
   
   
