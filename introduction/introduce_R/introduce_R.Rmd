@@ -3,14 +3,14 @@ title: "R / RStudioの導入"
 author: "Toshiki SHIBANO"
 date: "`r Sys.Date()`"
 output:
-  pdf_document:
-    latex_engin: xelatex
-    df_print: kable
-    toc: yes
   html_document:
     df_print: paged
     toc: yes
     toc_float: yes
+  pdf_document:
+    latex_engin: xelatex
+    df_print: kable
+    toc: yes
 documentclass: bxjsarticle
 classoption: 
   xelatex,ja=standard
@@ -19,12 +19,12 @@ classoption:
 ```{r setup, include=FALSE}
 
 # HTML用
-#knitr::opts_chunk$set(echo = TRUE)
+knitr::opts_chunk$set(echo = TRUE)
 
 # PDF用
-knitr::opts_chunk$set(echo = TRUE,
-                      dev = "cairo_pdf",
-                      dev.args = list(family = "ipaexg"))  
+#knitr::opts_chunk$set(echo = TRUE,
+#                      dev = "cairo_pdf",
+#                      dev.args = list(family = "ipaexg"))  
 
 ```
 
@@ -127,7 +127,7 @@ df
 y, x1列は数値が入っており，x2は文字が入っています．
 またこのようなデータ形式のことをtidyデータといいます．
 tidyデータは非常に重要であり，多くのRの関数はこのtidyデータを対象にしています．
-詳細はR for Data Science (by Hadley Wickham & Garrett Frolemund) (URL: https://r4ds.had.co.nz/index.html) の12章を参照して下さい．
+詳細はR for Data Science (by Hadley Wickham & Garrett Grolemund) (URL: https://r4ds.had.co.nz/index.html) の12章を参照して下さい．
 
 注意点  
 Rを使う時にExcelで保存する時はtidyデータになるように保存しましょう．  
