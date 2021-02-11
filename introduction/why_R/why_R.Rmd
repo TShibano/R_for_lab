@@ -3,19 +3,34 @@ title: "なぜR?"
 author: "Toshiki SHIBANO"
 date: "`r Sys.Date()`"
 output:
-  pdf_document:
-    toc: yes
   html_document:
+    df_print: paged
     toc: yes
+    toc_float: yes
+  pdf_document:
+    latex_engin: xelatex
+    df_print: kable
+    toc: yes
+documentclass: bxjsarticle
+classoption: 
+  xelatex,ja=standard
 ---
 
 ```{r setup, include=FALSE}
+
+# HTML用
 knitr::opts_chunk$set(echo = TRUE)
+
+# PDF用
+#knitr::opts_chunk$set(echo = TRUE,
+#                      dev = "cairo_pdf",
+#                      dev.args = list(family = "ipaexg"))  
+
 ```
   
   
   
-## データ分析とは
+# データ分析とは
 私はデータ分析は大きく分けて次の6つから成り立っていると考えています．
 
 1. 実験計画
@@ -25,7 +40,7 @@ knitr::opts_chunk$set(echo = TRUE)
 5. 統計処理(検定，モデリング)
 6. 結果の吟味，考察，提案
 
-0と6に関しては解析ツールがほぼ必要なく，自分の頭とペンで行えます(実験計画における乱数などの例外はありますが)．
+1と6に関しては解析ツールがほぼ必要なく，自分の頭とペンで行えます(実験計画における乱数などの例外はありますが)．
 
 しかしながら2 ~ 4に関しては，何かしらのツールが必須となっています．
 今の時代，グラフを手書きで描くなんてことはほぼ無いでしょう．
@@ -37,7 +52,7 @@ knitr::opts_chunk$set(echo = TRUE)
   
   
   
-## R言語とは
+# R言語とは
 Wikipedia (https://ja.wikipedia.org/wiki/R言語) をまとめますと
 
 - 日本語対応
@@ -47,7 +62,7 @@ Wikipedia (https://ja.wikipedia.org/wiki/R言語) をまとめますと
 - 他人が開発したパッケージ(便利なツール)をDLして使用可能であり，また自分が作って他人に配ることも可能
 
 
-## なぜRを使うのか
+# なぜRを使うのか
 
 - 無料だから
 - バージョンさえ合わせれば，世界中の誰がしても同じ結果が得られるから(再現性)
@@ -56,7 +71,7 @@ Wikipedia (https://ja.wikipedia.org/wiki/R言語) をまとめますと
 - Pythonと比較して使い始めるまでが簡単(と思います)
 
 
-## R Markdownのススメ
+# R Markdownのススメ
 Rはスクリプトファイル(メモ帳みたいなもの)に書いて実行することが多いと思います．
 しかしながら，非常に便利なR Markdownというものがあります．
 私も最近使い始めました(これもR Markdownで書いてます)．なぜ便利なのか，一言でまとめるなら
@@ -69,7 +84,7 @@ Wordなどと行ったり来たりする必要がありませんし，解析し�
 初めは使い慣れるのに時間がかかるかもしれませんが，ぜひマスターしていただきたいです．
 
 
-## 解析例
+# 解析例
 Rで解析例を載せます．データは架空です．
 
 内容
@@ -105,9 +120,9 @@ b3 <- sample(c("A", "B", "C"), replace = FALSE)
 b4 <- sample(c("A", "B", "C"), replace = FALSE)
 
 # 行列をフィールドに見立てる
-test_field <- matrix(c(b1, b2, b3, b4), ncol = 3)
-colnames(test_field) <- c("", "", "" ) # 列の名前
-rownames(test_field) <- c("b1", "b2", "b3", "b4") # 行の名前
+test_field <- matrix(c(b1, b2, b3, b4), ncol = 4)
+colnames(test_field) <- c("b1", "b2", "b3", "b4" ) # 列の名前
+rownames(test_field) <- c("", "", "") # 行の名前
 
 # test_field
 knitr::kable(test_field, format = "pandoc")
@@ -120,10 +135,7 @@ knitr::kable(test_field, format = "pandoc")
 yield <- read.csv(file = "yield.csv", header = TRUE)
 
 # データの表示
-# R Markdownで出力を整えるためのコード
-#yield
-# で良い
-knitr::kable(yield, format = "pandoc")
+yield
 
 # variety列とblock列をcharacter型からfactor型に変更する
 # 後のTukeyHSDを使った多重比較のため
@@ -157,10 +169,7 @@ yield_by_variety <-
             sd = sd(yield),
             .groups = "drop")
 
-# R Markdownで出力を整えるためのコード
-# yield_by_variety
-# で良い
-knitr::kable(yield_by_variety, format = "pandoc")
+yield_by_variety
 
 p <- ggplot(data = yield_by_variety, 
             mapping = aes(x = mean, y = variety, color = variety))
@@ -177,10 +186,8 @@ yield_by_block <-
             mean = mean(yield),
             sd = sd(yield),
             .groups = "drop")
-# R Markdownで出力を整えるためのコード
-# yield_by_variety
-# で良い
-knitr::kable(yield_by_block, format = "pandoc")
+yield_by_variety
+
 p <- ggplot(data = yield_by_block,
             mapping = aes(x = mean, y = block, color = block))
 p3 <- p + geom_pointrange(mapping = aes(xmin = mean - sd, xmax = mean + sd)) + 
@@ -206,7 +213,7 @@ anova_RB <- aov(yield ~ variety + block, data = yield)
 # anova_RB
 # でよい
 res_RB <- broom::tidy(anova_RB)
-knitr::kable(res_RB, format = "pandoc")
+res_RB
   
 ```
 
@@ -214,18 +221,16 @@ knitr::kable(res_RB, format = "pandoc")
 ```{r Multiple Comparison}
 res_tukey <- TukeyHSD(aov(yield$yield ~ yield$variety))
 
-# R Markdownで出力を整えるためのコード
-# res_tukey
-# でよい
-knitr::kable(data.frame(res_tukey$`yield$variety`), format = "pandoc")
+res_tukey$`yield$variety`
+
 ```
 
 AとB，AとCに有意差があり，BとCには有意差がなかった．
 
 今回のような圃場条件では，Aが一番取れる品種だろう．
 
-有意差の結果を踏まえてもう一度グラフを描く
-```{r }
+有意差の結果を踏まえてもう一度グラフを描く．
+```{r graph for report}
 # 箱ひげ図
 p <-  ggplot(data = yield, 
            mapping = aes(x = variety, y = yield))
@@ -255,7 +260,7 @@ p + geom_col() +
 ```
 
 
-## 補足
+# 補足
 今回のデータはRを使って作成しました．
 
 品種A, B, Cについて
@@ -264,9 +269,9 @@ p + geom_col() +
 - B: 平均260，標準偏差10の正規分布
 - C: 平均250，標準偏差10の正規分布
 
-です．ブロック間で変動はもうけていません．
+です．ブロック間で変動はありません．
 
-```{r}
+```{r create data}
 set.seed(seed = 0)
 va <- rnorm(n = 4, mean = 300, sd = 10)
 vb <- rnorm(n = 4, mean = 260, sd = 10)
@@ -275,6 +280,7 @@ vc <- rnorm(n = 4, mean = 250, sd = 10)
 df <- data.frame("variety" = c(rep("A", 4), rep("B", 4), rep("C", 4)),
                  "block" = c(rep(1:4, 3)),
                  "yield" = c(va, vb, vc))
+df
 # csvファイルに書き出し
 write.csv(df, "yield.csv", row.names = FALSE)
 
@@ -282,7 +288,7 @@ write.csv(df, "yield.csv", row.names = FALSE)
 
 
 
-## 文献
+# 文献
 おそらくネットを調べればたくさん出てくると思います．
 以下私が読んだ，もしくは流し見をして良かった印象がある本をあげます．
 
