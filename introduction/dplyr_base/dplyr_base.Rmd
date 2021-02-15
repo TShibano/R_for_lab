@@ -1,0 +1,228 @@
+---
+title: "dplyrの基礎"
+author: "Toshiki SHIBANO"
+date: "`r Sys.Date()`"
+output:
+  html_document:
+    df_print: paged
+    toc: yes
+    toc_float: yes
+  pdf_document:
+    latex_engin: xelatex
+    df_print: kable
+    toc: yes
+documentclass: bxjsarticle
+classoption: 
+  xelatex,ja=standard
+---                                      
+
+```{r setup, include=FALSE}
+# HTML用
+knitr::opts_chunk$set(echo = TRUE)
+
+# PDF用
+#knitr::opts_chunk$set(echo = TRUE,
+#                      dev = "cairo_pdf",
+#                      dev.args = list(family = "ipaexg"))  
+
+
+```
+
+
+# dplyrとは
+dplyr: A Grammar of Data Manipulation  
+データフレームを効率よく簡単に操作することを可能にするパッケージです．
+内部はC++で書かれているため，高速に動作します．
+%>% (パイプ演算子)という特殊な演算子を用いることで，可読性(読み易い)に優れたコードを書くことが出来ます．
+
+以下のコマンドを実行してdplyrをインストールしましょう
+```{r install dplyr}
+# インストールする時はinstall.package()の文章をコメントアウトして下さい．
+# dplyrパッケージのインストール
+#install.packages("dplyr")
+# もしくはtidyverseパッケージ(dplyrやggplot2など)をインストール
+#install.packages("tidyverse")
+
+# 一度インストールした後はlibrary()関数を使用する
+library(dplyr)
+library(tidyverse)
+```
+
+# よく使うdplyrパッケージの関数
+チートシートはこちらのURL[https://github.com/rstudio/cheatsheets/blob/master/data-transformation.pdf]にあります．
+RStudioのGitHubにアクセスします．
+そこにdplyr以外にも沢山のチートシートがあります．
+日本語訳もtranslationsフォルダにあります．
+探してみて下さい．
+そしてぜひ手元に置いてください．
+
+例を元にして，よく使う関数の紹介をします．
+実際に実行していくことをお勧めします
+
+## データの準備
+みんな大好きirisデータを用います．
+irisデータは，それぞれのSpecies(setosa, versicolo, virginica)に対して，4つの変数(Sepal.Lentgh, Sepal.Width, Petal.Length, Petal.Width)を記録しています．  
+実際に見ていきましょう
+```{r read data}
+# irisデータの確認
+# irisデータはRにもともと入っている
+# irisデータフレームの上から10個のデータを確認
+head(iris, n = 10)
+
+# str関数を使うことでデータの概略が分かる
+str(iris)
+```
+## select()
+select()関数: 指定した列(column)のみを抽出する
+
+```{r select}
+iris %>%
+  select(Sepal.Length) %>% 
+  head(n = 5) # 上から5行を表示する
+
+# パイプ演算子を使わなかった場合はこうなります
+head(select(iris, Sepal.Length), n = 5)
+  
+```
+
+%>% (パイプ演算子)について  
+- a %>% function(b) 
+- function(a, b)  
+この二つは同じことを表しています．すなわち，パイプ演算子を使うことで，aという変数に対して，引数bの関数を実行するということを示しています．
+上のselect関数については，iris変数を引数Sepal.Lengthのselect関数に渡して実行する，ということになります．  
+初めはパイプ演算子に慣れないかもしれませんが，書いていくうちに分かるようになります．
+
+
+## mutate()
+mutate()関数: データフレームに列として結合させる
+```{r mutate}
+iris %>% 
+  filter(Species == "versicolor") %>% 
+  mutate(Sepal.Length_Sepal.Width = Sepal.Length*Sepal.Width) %>% 
+  # Sepal.LengthとSepal.Widthの掛け算した値を
+  # 新たな変数(Sepal.Length_Sepal.Width)として追加
+  head(n = 5)
+```
+
+
+## filter()
+filter()関数: 指定した行(row)を抽出する
+```{r filter}
+iris %>% 
+  filter(Species == "setosa") %>% 
+  head(n = 5)
+```
+
+
+## arrange()
+arrange()関数: 行を並び替える
+```{r arrange}
+iris %>% 
+  filter(Species == "setosa") %>%  # 種がsetosaの行を抽出
+  arrange(Sepal.Length) %>%  # Sepal.Lengthを昇順でソート
+  head(n = 6)
+
+iris %>% 
+  filter(Species == "virginica") %>% 
+  arrange(desc(Sepal.Length)) %>% # Sepal.Lengthを降順でソート
+  head(n = 6)
+```
+
+
+## summarise()
+summarize()関数: データを関数に基づいて集計する
+```{r summarize}
+# irisデータの全ての個数および全ての平均を求める
+iris %>% 
+  summarise(N = n(),　# n()関数で個数を求める
+            mena_Sepal_Length = mean(Sepal.Length) # mean()関数で平均値を求める
+            )
+```
+
+## group_by()
+group_by(): グルーピングする．  
+summarize()関数と組み合わせることで威力を発揮します．
+例えば，それぞれ種ごとに平均値や標準偏差を出したい場面があると思います．
+それは次のように書くことが出来ます．
+結果を確認してください．
+```{r group_by}
+# 各種の個数，最大値，平均値，分散を求める
+iris %>%
+  group_by(Species) %>%
+  summarise(N = n(), # n()関数で個数を求める
+            max_Sepal_Length = max(Sepal.Length), # max()関数で最大値求める
+            mean_Sepal_Length = mean(Sepal.Length, na.rm = TRUE),  # mean()関数で平均値を求める
+            sd_Sepal_Length = sd(Sepal.Length, na.rm = TRUE), # sd()関数で標準偏差を求める
+            .groups = "drop" # グループ化した後の処理．後ほど述べます．書かない方が良い時もあります
+            )
+
+```
+補足  
+mean()やsd()関数はRに既に入っている関数です．
+summarise()関数では既存の関数以外にも自作関数を使うことも出来ます．
+
+
+
+## 補足: summarise()関数の .groups = "drop" について  
+.groups = "drop"を書かないと  
+`summarise()` ungrouping output (override with `.groups` argument)  
+というメッセージがコンソール画面に出力されます．
+これについて述べます．  
+gourp_by()関数は2つ以上の条件でグルーピングすることも可能です．
+group_by()関数でグルーピングした後に，summarise()関数を用いて要約すると，最後にグルーピングした条件のみが解除され，それ以外のグルーピング条件は**継続したまま**となります．
+場合によっては，グルーピングは全て解除したい場合もあります．
+そこで，.groups = "drop"と書くことでグルーピング条件を全て解除することが可能です．
+実際に，実行してみます．
+
+```{r .groups = "drop"}
+# 使用するデータの作成
+value <- rnorm(n = 50, mean = 0, sd = 1)
+variety <- c(rep("A", 20), rep("B", 20), rep("C", 10))
+treatment <- c(rep(c(rep("X", 10), rep("Y", 10)), 2), c(rep("X", 5)), c(rep("Y", 5)))
+df <- data.frame(value = value,
+                 variety = variety,
+                 treatment = treatment)
+df
+
+# .groups = "drop"を指定する
+df %>% 
+  group_by(variety, treatment) %>%  # まずvarietyでグルーピングして，次にtreatmentでグルーピング
+  summarise(N = n(),
+            .groups = "drop") %>%  # グルーピングを全て解除
+  mutate(prop = N/sum(N))
+
+# ungroup()関数でもでもグルーピングを解除できるが，警告文?は出る
+df %>% 
+  group_by(variety, treatment) %>% 
+  summarize(N = n()) %>% 
+  ungroup() %>% # グルーピングを解除する関数
+  mutate(prop = N/sum(N))
+
+# .groups = "drop"を指定しない
+df %>% 
+  group_by(variety, treatment) %>% 
+  summarise(N = n()) %>% 
+  mutate(prop = N/sum(N))
+```
+
+各場合の割合を求めます．
+グルーピングを解除した場合，全体に対する割合を求めることになります．
+一方で解除しなかった場合，上の例では，まだvarietyに対するグルーピングが残っているので，varietyグループ内で割合を求めます．
+よって以上のような違いを確認することができます．
+このことに注意をしておかないと間違った集計をしてしまう可能性があります．
+気をつけましょう．
+
+## その他の機能
+dplyrの機能はたくさんあります．
+しかし一度に全てを覚える必要はありません．
+行いたい作業を考えた時に，まずそれを効率化する方法はないか？ということを考えて，機能を調べるのが一番良いと思います．
+多くの場合ですでに便利な関数が実装されています．
+
+
+# 参考文献
+ウェブサイトをあげておきます．自分も目下勉強中です．
+
+- https://dplyr.tidyverse.org
+- https://dplyr.tidyverse.org/articles/dplyr.html (上のサイトでGet started押したサイト)
+- https://qiita.com/matsuou1/items/e995da273e3108e2338e
+- https://www.jaysong.net/dplyr_intro/
